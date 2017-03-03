@@ -1,4 +1,6 @@
+pathdef.m
 *.fdt
 *.sc
 *.sph
 *.wts
+*.spl

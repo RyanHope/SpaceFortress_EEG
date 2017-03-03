@@ -26,14 +26,15 @@ close all
 
 %% Process subjects
 
-for subject = 1:3
+for subject = 5:17
 
     %%% LOAD .bdf and external event file
     sid = ['subject' int2str(subject)];
     fname1 = fullfile(eeg_path, [sid '.bdf']);
+    fname1
     fname2 = fullfile(out_path, 'eeg_event_files', [sid '.ext']);
-    mkdir(fullfile(out_path, 'postinterp', filesep));
-    fname3 = fullfile(out_path, 'postinterp', filesep, [sid '_postinterp.set']);
+    mkdir(fullfile(out_path, 'postica', filesep));
+    fname3 = fullfile(out_path, 'postica', filesep, [sid '_postica.set']);
     EEG = pop_biosig(fname1, 'importevent', 'off', 'importannot', 'off', 'ref', [129 130]);
     EEG = eeg_checkset(EEG);
     EEG = pop_importevent(EEG, 'event', fname2, 'fields', {'latency' 'game' 'type'}, 'timeunit', 1, 'optimalign', 'off', 'append', 'no');
@@ -148,20 +149,11 @@ for subject = 1:3
     EEG.chanlocs(end+1).labels = 'VEOG';
     EEG = eeg_checkset(EEG);
 
-    %%% FLAG AND REMOVE ARTIFACT COMPONENTS
-    EEG = clean_components(EEG,30,.5,.4,.4);
-    EEG = eeg_checkset(EEG);
+    %%% Backup original chanlocs
+    EEG.etc.chanlocsOrig = originalEEG.chanlocs;
 
-    %%% Keep only data channels
-    EEG = pop_select(EEG,'nochannel',{originalEEG.chanlocs(128:end).labels 'HEOG' 'VEOG'});
-    EEG = eeg_checkset(EEG);
-
-    % Interpolate all the removed channels
-    % NOTE: when passed a full channel structure (2nd arg) missing channs
-    % as compared to EEG are interpolated
-    EEG = pop_interp(EEG, originalEEG.chanlocs(1:128), 'spherical');
-
-    EEG.setname = [sid '-cleaned'];
+    %%% Save cleaned ICA data
+    EEG.setname = [sid '-postica'];
     pop_saveset(EEG, 'filename', fname3, 'version', '7.3');
 
     close all
