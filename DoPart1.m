@@ -1,5 +1,8 @@
 %%%Automatically perform all EEG pre-processing steps
 
+%%% NOTE: This script requires the clean_rawdata plugin for eeglab
+%%% NOTE: This script uses CUDAICA which right now only builds on linux/osx
+
 %% Common code
 
 clear all
@@ -71,7 +74,7 @@ for subject = 1:3
     EEG = pop_eegfiltnew(EEG, 0.1, 0, 16896, 0, [], 0);
     EEG = eeg_checkset(EEG);
 
-    %%% 42HZ low-pass filer
+    %%% 42-Hz low-pass filer (really 47.5-Hz)
     EEG = pop_eegfiltnew(EEG, [], 42);
     EEG = eeg_checkset(EEG);
 
@@ -88,6 +91,7 @@ for subject = 1:3
     % Apply clean_rawdata() to reject bad channels and windows
     % NOTE: highpass and burst (ASR) are disabled
     % NOTE: clean_rawdata removes bad channels from EEG
+    % NOTE: use vis_artifacts(EEG, originalEEG) to compare new and old data
     originalEEG = EEG;
     EEG = clean_rawdata(originalEEG, 5, -1, 0.80, 4, -1, 0.8);
 
@@ -123,7 +127,7 @@ for subject = 1:3
     EEGica = pop_resample(EEGica, 128);
     EEGica = eeg_checkset(EEGica);
 
-    %%% Drop non-data channels
+    %%% Drop non-data channels to avoid rank deficiency
     EEGica = pop_select(EEG, 'nochannel', cell2mat(arrayfun(@(x) find(strcmp(x,{EEGica.chanlocs.labels})), {originalEEG.chanlocs(129:end).labels},'un',0)));
     EEGica = eeg_checkset(EEGica);
 
