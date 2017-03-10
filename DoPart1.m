@@ -14,7 +14,7 @@ fb = strfind(basepath,filesep);
 basepath = basepath(1:fb(end));
 eeg_path = fullfile(basepath,'data','orig','raw_eeg');
 beh_path = fullfile(basepath,'data','orig','game_logs');
-out_path = fullfile(basepath,'data','processed_new');
+out_path = fullfile(basepath,'data','processed');
 lab_path = basepath(1:fb(end-1));
 lab_path = fullfile(lab_path,'workspace','eeglab');
 loc_file = fullfile(lab_path,'plugins','dipfit2.3','standard_BEM','elec','standard_1005.elc');
@@ -75,8 +75,8 @@ for subject = 5:17
     EEG = pop_eegfiltnew(EEG, 0.1, 0, 16896, 0, [], 0);
     EEG = eeg_checkset(EEG);
 
-    %%% 42-Hz low-pass filer (really 47.5-Hz)
-    EEG = pop_eegfiltnew(EEG, [], 42);
+    %%% 40-Hz low-pass filer (really 47.5-Hz)
+    EEG = pop_eegfiltnew(EEG, [], 40);
     EEG = eeg_checkset(EEG);
 
     %%% Remove non-game periods
@@ -94,7 +94,7 @@ for subject = 5:17
     % NOTE: clean_rawdata removes bad channels from EEG
     % NOTE: use vis_artifacts(EEG, originalEEG) to compare new and old data
     originalEEG = EEG;
-    EEG = clean_rawdata(originalEEG, 5, -1, 0.80, 4, -1, 0.8);
+    EEG = clean_rawdata(originalEEG, 5, -1, 0.7, 4.5, -1, 0.8);
 
     %%% Drop samples that were marked bad so that we can restore the
     %%% occular channels
@@ -111,6 +111,10 @@ for subject = 5:17
         bads = {'Fpz'};
     elseif subject == 13
         bads = {'P2','CCP3h'};
+    elseif subject == 15
+        bads = {'TP10','P10'};
+    elseif subject == 17
+        bads = {'FTT9h','PPO1h','CP4','CP6'};
     end
     if length(bads) > 0
         for i = 1:length(bads)

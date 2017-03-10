@@ -1,4 +1,4 @@
-function signal = clean_components(signal,window_len,window_overlap,VEOG_corr,HEOG_corr)
+function [v_mask h_mask] = find_HVEOG_components(signal,window_len,window_overlap,VEOG_corr,HEOG_corr)
 %   EEG = clean_components(signal,window_len,window_overlap,VEOG_corr,HEOG_corr)
 %   signal = EEG data.
 %   window_len = length of window (in seconds) for comupting correlation
@@ -74,10 +74,10 @@ else
     h_mask = [];
 end
 
-signal = pop_subcomp( signal, [v_mask h_mask], 0);
-signal = eeg_checkset( signal );
+%signal = pop_subcomp( signal, [v_mask h_mask], 0);
+%signal = eeg_checkset( signal );
 
-field = {'VEOG';'HEOG';'Noise'};
+%field = {'VEOG';'HEOG';'Noise'};
 
-ICAnotes = struct(field{1},{v_mask},field{2},{h_mask});
-signal.etc.ICAnotes = ICAnotes;
+%ICAnotes = struct(field{1},{v_mask},field{2},{h_mask});
+%signal.etc.ICAnotes = ICAnotes;

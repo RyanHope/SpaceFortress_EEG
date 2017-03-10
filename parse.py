@@ -12,6 +12,7 @@ import csv
 import glob
 import mne
 import math
+import json
 from sf_util import *
 
 if __name__ == '__main__':
@@ -179,10 +180,11 @@ if __name__ == '__main__':
                     extras += [round(travel_time_to_hex(norm(float(row[6]), float(row[7])), float(row[4]), float(row[5]), float(row[6]), float(row[7]), radius=hexagonSizes[1]),3)]
                 else:
                     extras += ["NA","NA","NA","NA"]
+                extras += [int(len(json.loads(row[14]))/3),int(len(json.loads(row[15]))/3)]
                 rows.append(sinfo + row + extras)
                 if doEEG:
                     rows[-1].append(float(row[1]) - gs + float(start_times[int(game)-1][1]))
-            header += ["thrust_id","fire_id","bighex_size","smallhex_size","hex_size","ship_distance","normDist","travelDist_bixhex","travelDist_smallhex","travelTime_bixhex","travelTime_smallhex"]
+            header += ["thrust_id","fire_id","bighex_size","smallhex_size","hex_size","ship_distance","normDist","travelDist_bixhex","travelDist_smallhex","travelTime_bixhex","travelTime_smallhex","active_missiles","active_shells"]
             if doEEG:
                 header += ["eeg_time"]
             header = ["sid","session","game"] + header + ["points_raw","points_total"]

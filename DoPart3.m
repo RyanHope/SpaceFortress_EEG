@@ -9,7 +9,7 @@ clc
 basepath = cd;
 fb = strfind(basepath,filesep);
 basepath = basepath(1:fb(end));
-out_path = fullfile(basepath, 'data', 'processed_new');
+out_path = fullfile(basepath, 'data', 'processed');
 eeg_path = fullfile(out_path, 'postinterp');
 erp_path = fullfile(out_path, 'erp');
 beh_path = fullfile('data', 'orig', 'game_logs');
@@ -20,12 +20,11 @@ mkdir(erp_path);
 addpath(lab_path);
 eeglab;
 
-pop_editoptions('option_single', false, 'option_savetwofiles', false); %%% MEMORY MANAGEMENT STUFF
 close all
 
 %% Process subjects
 
-for subject = 5:5 %%% RUN FOR ONE OR ALL SUBJECTS
+for subject = [1:3 5:17] %%% RUN FOR ONE OR ALL SUBJECTS
 
     %%
 
@@ -46,7 +45,7 @@ for subject = 5:5 %%% RUN FOR ONE OR ALL SUBJECTS
         fname3 = char([sid, '-', char(event)]);
 
         EEG = pop_epoch(EEG, {  }, [-1.0 2.000], 'newname', fname3, 'epochinfo', 'yes');
-        %EEG = pop_rmbase( EEG, [-200 0]);
+        EEG = pop_rmbase( EEG, [-1000 0]);
         EEG = eeg_checkset(EEG);
 
         %%% Detect and interpolate channels that were only bad during some Epochs

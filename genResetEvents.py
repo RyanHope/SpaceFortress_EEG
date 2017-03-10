@@ -46,7 +46,10 @@ if __name__ == '__main__':
                     print(i,header[i])
             rows = [parseRow(r.strip().split("\t")) for r in fin.readlines()]
             R = len(rows)
+            total_shots = 0
             for i in xrange(len(rows)):
+                if rows[i][37] > total_shots:
+                    total_shots = rows[i][37]
                 if rows[i][6] > 0:
                     rows[i].append(np.hypot(rows[i][9],rows[i][10]))
                 else:
@@ -54,28 +57,33 @@ if __name__ == '__main__':
                 if i < R-1:
                     #FIND VLNER CHANGE
                     j = i + 1
-                    if rows[i][23] != rows[j][23]:
-                        if rows[j][23] > rows[i][23]:
-                            if rows[j][23] > 11:
-                                category = "kill-bad"
-                            else:
-                                category = "inc%02d" % rows[j][23]
-                        elif rows[j][23] < rows[i][23]:
-                            if rows[j][15] == -1:
-                                category = "kill-good"
-                            else:
-                                category = "reset"
+                    if rows[j][23] < rows[i][23] and rows[j][15] != -1:
                         nextShotLatency = 0
-                        while rows[j+nextShotLatency][17] == "[]":
-                            nextShotLatency += 1
-                            if j+nextShotLatency >= R:
-                                nextShotLatency = float("inf")
-                                break
-                        events[game-1].append([rows[i][c] for c in [0, 47, 3, 4]] + ['vlner',game,rows[i][23],rows[j][23],category,nextShotLatency])
+                        nextHitLatency = 0
+                        if rows[i][47] == 1 and rows[j][47] == 0:
+                            while rows[j+nextShotLatency][47] == 0:
+                                nextShotLatency += 1
+                                if j+nextShotLatency >= R:
+                                    nextShotLatency = float("inf")
+                                    break
+                            if nextShotLatency != float("inf"):
+                                nextHitLatency = nextShotLatency
+                                while rows[j+nextHitLatency][47] >= rows[j+nextHitLatency-1][47]:
+                                    nextHitLatency += 1
+                                    if j+nextHitLatency >= R:
+                                        nextHitLatency = float("inf")
+                                        break
+                        else:
+                            nextShotLatency = -1
+                            nextHitLatency = -1
+                            print("SHIT",sid,game,i,rows[i][47],rows[j][47])
+                        events[game-1].append([rows[i][c] for c in [0, 47, 3, 4, 50, 51]] + [game,rows[i][23],nextShotLatency,nextHitLatency])
+            for i in xrange(len(events[game-1])):
+                events[game-1][i].append(total_shots)
         eheader = [
-            "sid","eeg_time","game_time","system_time","event","game","vlner_old","vlner_new","vlner_category","nextShotLatency"
+            "sid","eeg_time","game_time","system_time","points_raw","points_total","game","vlner_old","nextShotLatency","nextHitLatency","total_shots"
         ]
-        with open(os.path.join(args.output_dir,"%s-vlner-events.tsv" % sid), "wb") as fout:
+        with open(os.path.join(args.output_dir,"%s-reset-events.tsv" % sid), "wb") as fout:
             fout.write("%s\n" % ("\t".join(eheader)))
             for g in xrange(len(events)):
                 for event in events[g]:
