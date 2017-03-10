@@ -26,7 +26,7 @@ close all
 
 %% Process subjects
 
-for subject = 5:17
+for subject = [1:3 5:17]
 
     %%% LOAD .bdf and external event file
     sid = ['subject' int2str(subject)];
